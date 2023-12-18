@@ -1,0 +1,58 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+export default class Cache {
+    constructor() {
+        this.data = [];
+        this.timeout = 1000 * 120;
+    }
+    static getData(arg0) {
+        throw new Error("Method not implemented.");
+    }
+    static getInstance() {
+        if (!this.instance)
+            this.instance = new Cache();
+        return this.instance;
+    }
+    getData(key) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const existingData = this.data.find(e => e.key === key);
+            if (existingData) {
+                const now = new Date(); // this is now
+                const when = new Date(existingData.when); // this is the time when the record was pushed to cache
+                const diff = now.getTime() - when.getTime(); // this is the difference in milliseconds
+                // date.getTime() return a timestamp, which is the number of milliseconds since the Epoch
+                if (diff < this.timeout) {
+                    return existingData.content;
+                }
+            }
+            const response = yield fetch(key);
+            const json = yield response.json();
+            this.setData(key, json);
+            return this.data.find(e => e.key === key).content;
+        });
+    }
+    setData(key, content) {
+        const existingDataIndex = this.data.findIndex(e => e.key === key);
+        if (existingDataIndex > 0) {
+            this.data[existingDataIndex] = {
+                key,
+                content,
+                when: new Date()
+            };
+        }
+        else {
+            this.data.push({
+                key,
+                content,
+                when: new Date()
+            });
+        }
+    }
+}

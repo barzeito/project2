@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "@types/jquery": "^3.5.29"
+  },
+  "dependencies": {
+    "@types/canvasjs": "^1.9.11"
+  }
+}
